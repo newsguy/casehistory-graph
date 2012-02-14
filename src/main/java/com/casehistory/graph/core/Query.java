@@ -5,6 +5,8 @@ package com.casehistory.graph.core;
 
 import java.io.Serializable;
 
+import com.casehistory.graph.strings.StringUtils;
+
 /**
  * A query node, contains a query string and the best news article results for
  * this query.
@@ -22,11 +24,6 @@ public class Query implements GraphNode {
 		this.bestResults = bestResults;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.casehistory.graph.core.GraphNode#getName()
-	 */
 	@Override
 	public String getName() {
 		StringBuilder builder = new StringBuilder("Query [");
@@ -37,7 +34,16 @@ public class Query implements GraphNode {
 		return builder.toString();
 	}
 
-	@SuppressWarnings("serial")
+	@Override
+	public String getQuery() {
+		return StringUtils.join(queryTerms);
+	}
+
+	@Override
+	public NewsArticle[] getBestResults() {
+		return bestResults;
+	}
+
 	public class NewsArticle implements Serializable {
 
 		public final String url;

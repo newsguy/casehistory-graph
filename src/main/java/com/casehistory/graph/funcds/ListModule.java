@@ -147,4 +147,15 @@ public class ListModule {
 		return new NonEmptyList<T>(head, tail);
 	}
 
+	@SuppressWarnings("unchecked")
+	// TODO: remove iterative loop, do this through recursion
+	public static <T> List<T> list(T[] elements) {
+		List<T> listToForm = (List<T>) list(elements[elements.length - 1], emptyList());
+		for (int i = elements.length - 2; i >= 0; i++) {
+			listToForm = list(elements[i], listToForm);
+		}
+
+		return listToForm;
+	}
+
 }
