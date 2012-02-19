@@ -4,7 +4,13 @@
 package com.casehistory.graph.core;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import com.casehistory.graph.option.Option;
 import com.casehistory.graph.strings.StringUtils;
 
 /**
@@ -13,47 +19,93 @@ import com.casehistory.graph.strings.StringUtils;
  * 
  * @author Abhinav Tripathi
  */
-@SuppressWarnings("serial")
 public class Query implements GraphNode {
 
-	private String[] queryTerms;
-	private NewsArticle[] bestResults;
+	private static final long serialVersionUID = -4176121051213850392L;
 
-	public Query(String[] queryTerms, NewsArticle[] bestResults) {
-		this.queryTerms = queryTerms;
-		this.bestResults = bestResults;
+	public final Date createdAt;
+	private final String[] queryTerms;
+	/**
+	 * Maps the best results available for this query to news sites.
+	 */
+	private Map<String, Set<NewsArticle>> bestResults;
+
+	public Query(Option<String[]> queryTerms, Option<Map<String, Set<NewsArticle>>> bestResults) {
+		this.createdAt = new Date();
+		if (queryTerms.hasValue())
+			this.queryTerms = queryTerms.get();
+		else
+			throw new IllegalArgumentException("Invalid arguments given for creating a query node!");
+		if (bestResults.hasValue())
+			this.bestResults = bestResults.get();
+		else
+			throw new IllegalArgumentException("Invalid arguments given for creating a query node!");
 	}
 
 	@Override
 	public String getName() {
-		StringBuilder builder = new StringBuilder("Query [");
-		for (String term : queryTerms)
-			builder.append(term).append(" ");
-		builder.append("]");
-
-		return builder.toString();
+		return new StringBuilder("Query [").append(getQuery()).append("]").toString();
 	}
 
 	@Override
+	public Date getCreationTime() {
+		return createdAt;
+	}
+
 	public String getQuery() {
 		return StringUtils.join(queryTerms);
 	}
 
-	@Override
-	public NewsArticle[] getBestResults() {
-		return bestResults;
+	public Map<String, Set<NewsArticle>> getBestResults() {
+		return Collections.unmodifiableMap(bestResults);
+	}
+
+	public void addResult(String newspaper, NewsArticle article) {
+		if (bestResults.containsKey(newspaper)) {
+			bestResults.get(newspaper).add(article);
+		} else {
+			Set<NewsArticle> articles = new HashSet<NewsArticle>();
+			articles.add(article);
+			bestResults.put(newspaper, articles);
+		}
+	}
+
+	public void removeResult(String newspaper, NewsArticle article) {
+		if (bestResults.containsKey(newspaper)) {
+			bestResults.get(newspaper).remove(article);
+		}
+	}
+	
+	public void resetResults(String newspaper, Set<NewsArticle> articles) {
+		bestResults.put(newspaper, articles);
 	}
 
 	public class NewsArticle implements Serializable {
+
+		private static final long serialVersionUID = -3490211901946081577L;
 
 		public final String url;
 		public final String[] words;
 		public final double[] vector;
 
-		public NewsArticle(String url, String[] words, double[] vector) {
-			this.url = url;
-			this.words = words;
-			this.vector = vector;
+		public NewsArticle(Option<String> url, Option<String[]> words, Option<double[]> vector) {
+			if (url.hasValue())
+				this.url = url.get();
+			else
+				throw new IllegalArgumentException("Invalid arguments given for news article!");
+			if (words.hasValue())
+				this.words = words.get();
+			else
+				throw new IllegalArgumentException("Invalid arguments given for news article!");
+			if (vector.hasValue())
+				this.vector = vector.get();
+			else
+				throw new IllegalArgumentException("Invalid arguments given for news article!");
+		}
+
+		@Override
+		public String toString() {
+			return "NewsArticle [url=" + url + "]";
 		}
 
 	}
