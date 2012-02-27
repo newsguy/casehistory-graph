@@ -1,7 +1,9 @@
 package com.casehistory.graph.core;
 
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -14,9 +16,9 @@ public abstract class AbstractGraph implements Serializable {
 
 	private static final long serialVersionUID = -2529271384525223550L;
 
-	private final Set<GraphNode> roots = new HashSet<GraphNode>();
-	private final List<GraphNode> nodes = new ArrayList<GraphNode>();
-	private final Representation representation;
+	protected final Set<GraphNode> roots = new HashSet<GraphNode>();
+	protected final List<GraphNode> nodes = new ArrayList<GraphNode>();
+	protected final Representation representation;
 
 	public AbstractGraph() {
 		this.representation = new AdjacencyMatrix();
@@ -34,6 +36,8 @@ public abstract class AbstractGraph implements Serializable {
 	 */
 	public static interface Representation {
 
+		public void add(GraphNode node, Collection<GraphNode> neighbours);
+		
 	}
 
 	public Set<GraphNode> getRoots() {
@@ -45,6 +49,8 @@ public abstract class AbstractGraph implements Serializable {
 	}
 
 	public abstract void addNode(GraphNode node);
+	
+	public abstract void addNode(String[] queryTerms) throws NoSuchAlgorithmException;
 
 	class AdjacencyMatrix implements Serializable, Representation {
 
@@ -59,11 +65,14 @@ public abstract class AbstractGraph implements Serializable {
 
 		public final double DEFAULT_THRESHOLD = 0.8d;
 		private double threshold;
+		
+		private int currentpos;
 
 		public AdjacencyMatrix() {
 			initialsize = DEFAULT_INITIAL_SIZE;
 			threshold = DEFAULT_THRESHOLD;
 			policy = new DoubleUp();
+			currentpos = 0;
 		}
 
 		public AdjacencyMatrix(int initialsize) {
@@ -71,6 +80,7 @@ public abstract class AbstractGraph implements Serializable {
 			matrix = new int[initialsize][initialsize];
 			this.threshold = DEFAULT_THRESHOLD;
 			this.policy = new DoubleUp();
+			currentpos = 0;
 		}
 
 		void resize() {
@@ -84,6 +94,14 @@ public abstract class AbstractGraph implements Serializable {
 
 		void setThreshold(double threshold) {
 			this.threshold = threshold;
+		}
+
+		@Override
+		public void add(GraphNode node, Collection<GraphNode> neighbours) {
+			currentpos++;
+			for(GraphNode neighbour : neighbours) {
+				matrix[currentpos][nodes.indexOf(neighbour)-1] = 1;
+			}
 		}
 
 	}

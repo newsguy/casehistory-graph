@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.casehistory.graph.strings;
+package com.casehistory.graph.utils;
 
 import com.casehistory.graph.funcds.ListModule;
 import com.casehistory.graph.functions.Function2;

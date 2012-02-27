@@ -4,6 +4,8 @@
 package com.casehistory.graph.core;
 
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -11,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.casehistory.graph.option.Option;
-import com.casehistory.graph.strings.StringUtils;
+import com.casehistory.graph.utils.StringUtils;
 
 /**
  * A query node, contains a query string and the best news article results for
@@ -30,7 +32,10 @@ public class Query implements GraphNode {
 	 */
 	private Map<String, Set<NewsArticle>> bestResults;
 
-	public Query(Option<String[]> queryTerms, Option<Map<String, Set<NewsArticle>>> bestResults) {
+	private String hashFileName;
+
+	public Query(Option<String[]> queryTerms, Option<Map<String, Set<NewsArticle>>> bestResults)
+			throws NoSuchAlgorithmException {
 		this.createdAt = new Date();
 		if (queryTerms.hasValue())
 			this.queryTerms = queryTerms.get();
@@ -40,6 +45,7 @@ public class Query implements GraphNode {
 			this.bestResults = bestResults.get();
 		else
 			throw new IllegalArgumentException("Invalid arguments given for creating a query node!");
+		computeHashFileName();
 	}
 
 	@Override
@@ -75,9 +81,31 @@ public class Query implements GraphNode {
 			bestResults.get(newspaper).remove(article);
 		}
 	}
-	
+
 	public void resetResults(String newspaper, Set<NewsArticle> articles) {
 		bestResults.put(newspaper, articles);
+	}
+
+	@Override
+	public String getFileName() {
+		return hashFileName;
+	}
+
+	private void computeHashFileName() throws NoSuchAlgorithmException {
+		String content = getQuery() + createdAt;
+
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		md.update(content.getBytes());
+
+		byte byteData[] = md.digest();
+
+		// convert the byte to hex format method 1
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < byteData.length; i++) {
+			sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+		}
+
+		this.hashFileName = sb.toString();
 	}
 
 	public class NewsArticle implements Serializable {

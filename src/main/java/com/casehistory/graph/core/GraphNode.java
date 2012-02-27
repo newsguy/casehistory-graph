@@ -9,10 +9,10 @@ import java.util.Date;
 /**
  * @author Abhinav Tripathi
  */
-public interface GraphNode extends Serializable {
+public interface GraphNode extends Serializable, HashFileNamed {
 
 	public String getName();
-	
+
 	public Date getCreationTime();
-	
+
 }

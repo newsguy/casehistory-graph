@@ -1,5 +1,6 @@
 package com.casehistory.graph.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,7 +13,7 @@ import java.util.List;
  * @author Abhinav Tripathi
  * @param <T>
  */
-public abstract class Trie<T, U> {
+public abstract class Trie<T, U extends HashFileNamed> {
 
 	/**
 	 * The root here is a special {@link TrieNode} in that it does not hold any
@@ -108,15 +109,20 @@ public abstract class Trie<T, U> {
 	 * @author Abhinav Tripathi
 	 * @param <T>
 	 */
-	class TrieNode {
+	class TrieNode implements Serializable {
+		
+		private static final long serialVersionUID = 8782365868072743572L;
+		
 		private T key;
-		private U data;
+		private transient U data;
+		private final String dataFileName;
 		private TrieNode parent;
 		private Collection<TrieNode> children;
 
 		public TrieNode(T key, U data, TrieNode parent) {
 			this.key = key;
 			this.data = data;
+			this.dataFileName = data.getFileName();
 			this.parent = parent;
 		}
 
