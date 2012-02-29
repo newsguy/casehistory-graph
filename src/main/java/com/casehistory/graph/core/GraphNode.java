@@ -12,6 +12,8 @@ import java.util.Date;
 public interface GraphNode extends Serializable, HashFileNamed {
 
 	public String getName();
+	
+	public String getIndexKey();
 
 	public Date getCreationTime();
 

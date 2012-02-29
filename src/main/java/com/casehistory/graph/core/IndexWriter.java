@@ -6,8 +6,8 @@ package com.casehistory.graph.core;
 /**
  * @author Abhinav Tripathi
  */
-public interface IndexWriter {
+public interface IndexWriter<T, U> {
 	
-	public void write();
+	public void write(Index<T, U> index);
 
 }

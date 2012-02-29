@@ -7,9 +7,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import com.casehistory.graph.core.Query.NewsArticle;
 import com.casehistory.graph.option.None;
@@ -25,6 +28,10 @@ import com.casehistory.graph.utils.DirectoryUtil;
 public class QueryGraph extends AbstractGraph {
 
 	private static final long serialVersionUID = -7435720926935182932L;
+	
+	private final Set<NodeCreationListener> nodeCreationListeners = new HashSet<NodeCreationListener>();
+	
+	private static Logger logger  = Logger.getLogger("VERBOSE");
 
 	// TODO: read from configuration
 	private final String baseDirectory = "";
@@ -34,23 +41,27 @@ public class QueryGraph extends AbstractGraph {
 	}
 
 	@Override
-	public void addNode(GraphNode node) {
-
+	public void addNode(String[] queryTerms) throws NoSuchAlgorithmException {
+		GraphNode queryNode = null;
+		try {
+			// add the node to the in-memory graph
+			queryNode = new Query(new Some<String[]>(queryTerms), new None<Map<String, Set<NewsArticle>>>());
+			nodes.add(queryNode);
+			representation.add(queryNode, findNeighbours(queryNode));
+	
+			// notify the listeners about the new node
+			for(NodeCreationListener listener : nodeCreationListeners) {
+				listener.nodeAdded(queryNode);
+			}
+	
+			persist(queryNode);
+		} catch (Exception e) {
+			removeNode(queryNode);
+		}
 	}
 
-	@Override
-	public void addNode(String[] queryTerms) throws NoSuchAlgorithmException {
-		// add the node to the in-memory graph
-		GraphNode queryNode = new Query(new Some<String[]>(queryTerms), new None<Map<String, Set<NewsArticle>>>());
-		nodes.add(queryNode);
-		representation.add(queryNode, findNeighbours(queryNode));
-
-		// add the node to the index
-
-		persist(queryNode);
-
-		// persist the index (batch op)
-
+	private void removeNode(GraphNode queryNode) {
+		
 	}
 
 	private void persist(GraphNode queryNode) {
@@ -66,7 +77,8 @@ public class QueryGraph extends AbstractGraph {
 			out.writeObject(queryNode);
 			out.close();
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			logger.error("Failed to persist the node " + queryNode.getName() + "! Node will not be added to the database." + ex);
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -81,6 +93,16 @@ public class QueryGraph extends AbstractGraph {
 	 */
 	private List<GraphNode> findNeighbours(GraphNode queryNode) {
 		return null;
+	}
+
+	@Override
+	public void register(NodeCreationListener listener) {
+		nodeCreationListeners.add(listener);
+	}
+
+	@Override
+	public void unregister(NodeCreationListener listener) {
+		nodeCreationListeners.remove(listener);
 	}
 
 }

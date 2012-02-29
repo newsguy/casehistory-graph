@@ -19,7 +19,7 @@ public abstract class AbstractGraph implements Serializable {
 	protected final Set<GraphNode> roots = new HashSet<GraphNode>();
 	protected final List<GraphNode> nodes = new ArrayList<GraphNode>();
 	protected final Representation representation;
-
+	
 	public AbstractGraph() {
 		this.representation = new AdjacencyMatrix();
 	}
@@ -39,6 +39,18 @@ public abstract class AbstractGraph implements Serializable {
 		public void add(GraphNode node, Collection<GraphNode> neighbours);
 		
 	}
+	
+	/**
+	 * Components (like indexes) interested in a node-creation event, should implement this interface
+	 * in order to be notified of node creation events.
+	 *  
+	 * @author Abhinav Tripathi
+	 */
+	public static interface NodeCreationListener {
+		
+		public void nodeAdded(GraphNode node);
+		
+	}
 
 	public Set<GraphNode> getRoots() {
 		return Collections.unmodifiableSet(roots);
@@ -48,9 +60,11 @@ public abstract class AbstractGraph implements Serializable {
 		return Collections.unmodifiableList(nodes);
 	}
 
-	public abstract void addNode(GraphNode node);
-	
 	public abstract void addNode(String[] queryTerms) throws NoSuchAlgorithmException;
+	
+	public abstract void register(NodeCreationListener listener);
+	
+	public abstract void unregister(NodeCreationListener listener);
 
 	class AdjacencyMatrix implements Serializable, Representation {
 

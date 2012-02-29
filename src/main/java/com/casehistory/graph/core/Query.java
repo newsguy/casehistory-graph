@@ -54,6 +54,11 @@ public class Query implements GraphNode {
 	}
 
 	@Override
+	public String getIndexKey() {
+		return getQuery();
+	}
+
+	@Override
 	public Date getCreationTime() {
 		return createdAt;
 	}
