@@ -66,6 +66,10 @@ public class Query implements GraphNode {
 	public String getQuery() {
 		return StringUtils.join(queryTerms);
 	}
+	
+	public String[] getQueryTerms() {
+		return queryTerms;
+	}
 
 	public Map<String, Set<NewsArticle>> getBestResults() {
 		return Collections.unmodifiableMap(bestResults);

@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +47,27 @@ public class QueryGraph extends AbstractGraph {
 		GraphNode queryNode = null;
 		try {
 			// add the node to the in-memory graph
-			queryNode = new Query(new Some<String[]>(queryTerms), new None<Map<String, Set<NewsArticle>>>());
+			queryNode = new Query(new Some<String[]>(queryTerms), new Some<Map<String, Set<NewsArticle>>>(new HashMap<String, Set<NewsArticle>>()));
+			nodes.add(queryNode);
+			representation.add(queryNode, findNeighbours(queryNode));
+	
+			// notify the listeners about the new node
+			for(NodeCreationListener listener : nodeCreationListeners) {
+				listener.nodeAdded(queryNode);
+			}
+	
+			persist(queryNode);
+		} catch (Exception e) {
+			removeNode(queryNode);
+		}
+	}
+	
+	@Override
+	public void addNode(String[] queryTerms, Map<String, Set<NewsArticle>> bestResults) throws NoSuchAlgorithmException {
+		GraphNode queryNode = null;
+		try {
+			// add the node to the in-memory graph
+			queryNode = new Query(new Some<String[]>(queryTerms), new Some<Map<String, Set<NewsArticle>>>(bestResults));
 			nodes.add(queryNode);
 			representation.add(queryNode, findNeighbours(queryNode));
 	
@@ -92,7 +114,27 @@ public class QueryGraph extends AbstractGraph {
 	 * @return
 	 */
 	private List<GraphNode> findNeighbours(GraphNode queryNode) {
-		return null;
+		List<GraphNode> neighbours = new ArrayList<GraphNode>();
+		for(GraphNode node : nodes) {
+			if (!node.equals(queryNode)) {
+				// brute-force search, works for small query vectors
+				boolean found = false;
+				for(String term : ((Query)queryNode).getQueryTerms()) {
+					for(String nodeTerm : ((Query)node).getQueryTerms()) {
+						if (term.equals(nodeTerm)) {
+							neighbours.add(node);
+							found = true;
+							break;
+						}
+					}
+					if (found)
+						break;
+				}
+				found = false; 
+			}
+		}
+		
+		return neighbours;
 	}
 
 	@Override

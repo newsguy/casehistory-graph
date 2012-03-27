@@ -115,14 +115,14 @@ public abstract class Trie<T, U extends HashFileNamed> {
 		
 		private T key;
 		private transient U data;
-		private final String dataFileName;
+		private final String fileName;
 		private TrieNode parent;
 		private Collection<TrieNode> children;
 
 		public TrieNode(T key, U data, TrieNode parent) {
 			this.key = key;
 			this.data = data;
-			this.dataFileName = data.getFileName();
+			this.fileName = data.getFileName();
 			this.parent = parent;
 		}
 
@@ -132,6 +132,10 @@ public abstract class Trie<T, U extends HashFileNamed> {
 
 		public U getData() {
 			return data;
+		}
+		
+		public String getFileName() {
+			return fileName;
 		}
 
 		public TrieNode getParent() {

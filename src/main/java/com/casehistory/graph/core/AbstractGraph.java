@@ -7,7 +7,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.casehistory.graph.core.Query.NewsArticle;
 
 /**
  * @author Abhinav Tripathi
@@ -61,6 +64,8 @@ public abstract class AbstractGraph implements Serializable {
 	}
 
 	public abstract void addNode(String[] queryTerms) throws NoSuchAlgorithmException;
+	
+	public abstract void addNode(String[] queryTerms, Map<String, Set<NewsArticle>> bestResults) throws NoSuchAlgorithmException;
 	
 	public abstract void register(NodeCreationListener listener);
 	
